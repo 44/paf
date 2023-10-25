@@ -9,6 +9,7 @@ require (
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell/v2 v2.5.4 // indirect
 	github.com/junegunn/fzf v0.0.0-20231022160530-b1a0ab8086f0 // indirect
+	github.com/leaanthony/go-ansi-parser v1.6.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
