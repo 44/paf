@@ -10,7 +10,9 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		fmt.Println(paf.FormatGrep(scanner.Text()))
+		text := scanner.Text()
+		fmt.Println(paf.FormatGrep(text))
+		// fmt.Println(text)
 	}
 }
 

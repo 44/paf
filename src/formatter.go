@@ -5,6 +5,10 @@ import (
 	"path"
 	"github.com/charmbracelet/lipgloss"
 	_ "github.com/junegunn/fzf/src/util"
+	ansi_parser "github.com/44/go-ansi-parser"
+	"strconv"
+	// "github.com/fatih/color"
+	"github.com/gookit/color"
 )
 
 var (
@@ -39,14 +43,86 @@ func FormatFile(fname string) string {
 	return f + " " + d
 }
 
-func FormatGrep(line string) string {
-	parts := strings.SplitN(line, ":", 3)
-	if len(parts) > 2 {
-		fname := parts[0]
-		line := parts[1]
-		text := parts[2]
-		d, f := OptimizeFile(fname)
-		return f + ":" + line + " " + d + " " + text
+func formatStyle(seg *ansi_parser.StyledText) string {
+	result := "["
+	result += "style=" + strconv.Itoa(int(seg.Style))
+	result += " mode=" + strconv.Itoa(int(seg.ColourMode))
+	if seg.FgCol != nil {
+		result += " fg=some"
 	}
-	return line
+	if seg.BgCol != nil {
+		result += " bg=some"
+	}
+	return result + "]{" + seg.Label + "}"
+}
+
+func toPlainText(text []*ansi_parser.StyledText) string {
+	result := ""
+	for _, t := range text {
+		result += t.Label
+	}
+	return result
+}
+
+func stripColor(text string) string {
+	result, err := ansi_parser.Parse(text, ansi_parser.WithIgnoreInvalidCodes(), ansi_parser.ParseOption{NonColorCodes: ansi_parser.Remove})
+	if err != nil {
+		return text
+	}
+	return toPlainText(result)
+}
+
+func FormatGrep(line string) string {
+	fnameStyle := color.HEX("9da").Sprint
+	lineStyle := color.HEX("fed").Sprint //color.New(color.FgHiGreen).SprintFunc()
+	columnStyle := color.HEX("fed").Sprint //color.New(color.FgHiGreen).SprintFunc()
+	dimStyle := color.HEX("777").Sprint
+	parts := strings.SplitN(line, ":", 4)
+	result := ""
+	if len(parts) > 0 {
+		result += fnameStyle(stripColor(parts[0]))
+		result += dimStyle(":")
+	}
+	if len(parts) > 1 {
+		result += lineStyle(stripColor(parts[1]))
+		result += dimStyle(":")
+	}
+	if len(parts) > 2 {
+		result += columnStyle(stripColor(parts[2]))
+		result += dimStyle(":")
+	}
+	if len(parts) > 3 {
+		result += parts[3]
+		// colored, err := ansi_parser.Parse(parts[3], ansi_parser.WithIgnoreInvalidCodes(), ansi_parser.ParseOption{NonColorCodes: ansi_parser.Remove})
+		// if err != nil {
+		// 	result += "ERR:" + parts[3]
+		// }
+		// for _, t := range colored {
+		// 	result += formatStyle(t)
+		// }
+		// result += parts[3]
+	}
+	return result
+
+	// text, err := ansi_parser.Parse(line, ansi_parser.WithIgnoreInvalidCodes(), ansi_parser.ParseOption{NonColorCodes: ansi_parser.Remove})
+	// result := ""
+	// if err == nil {
+	// 	for _, t := range text {
+	// 		result += formatStyle(t)
+	//
+	// 	}
+	// } else {
+	// 	result = err.Error()
+	// }
+	// return result
+
+	// parts := strings.SplitN(line, ":", 3)
+	// if len(parts) > 2 {
+	// 	fname := parts[0]
+	// 	line := parts[1]
+	// 	text := parts[2]
+	// 	d, f := OptimizeFile(fname)
+	// 	return f + ":" + line + " " + d + " " + text
+	// }
+	// return line
 }
